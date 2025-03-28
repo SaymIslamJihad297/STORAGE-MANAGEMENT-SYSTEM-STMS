@@ -11,6 +11,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GithubStrategy = require('passport-github2').Strategy;
 const mongoose = require('mongoose');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const dbUrl = process.env.DB_URL;
 main().then(() => {
@@ -127,6 +128,14 @@ app.use((req, res, next) => {
     res.locals.currUser = req.user;
     next();
 })
+
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+    message: "Too many request! Please Try again later."
+})
+
+app.use(limiter);
 
 app.use('/', userRoute);
 app.use('/file', fileRoutes);
